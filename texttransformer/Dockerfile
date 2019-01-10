@@ -4,5 +4,6 @@ RUN mkdir /src
 WORKDIR /src
 ADD . /src/
 RUN pip install -r requirements.txt
+RUN python -m nltk.downloader -d /usr/share/nltk_data stopwords
 
-CMD ["python", "/src/entityextractor.py"]
+CMD ["python", "/src/main.py"]

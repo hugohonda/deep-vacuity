@@ -11,4 +11,4 @@ RUN apk add --no-cache poppler-utils
 ENTRYPOINT ["/usr/bin/pdftotext"]
 CMD ["-", "-"] 
 
-CMD ["python", "/src/pdfextractor.py"]
+CMD ["python", "/src/main.py"]

@@ -1,22 +1,22 @@
 version: '3.6'
 services:
 
-  rabbitmq:
-    image: rabbitmq:3.7.8-management-alpine
-    hostname: rabbitmq
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=admin
-    ports:
-      - '15672:15672'
-      - '5672:5672'
-    healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:15672"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
-    networks:
-      - dou
+  # rabbitmq:
+  #   image: rabbitmq:3.7.8-management-alpine
+  #   hostname: rabbitmq
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=admin
+  #     - RABBITMQ_DEFAULT_PASS=admin
+  #   ports:
+  #     - '15672:15672'
+  #     - '5672:5672'
+  #   healthcheck:
+  #       test: ["CMD", "curl", "-f", "http://localhost:15672"]
+  #       interval: 30s
+  #       timeout: 10s
+  #       retries: 5
+  #   networks:
+  #     - dou
 
   # elasticsearch:
   #   image: elasticsearch:5.6.14-alpine
@@ -43,14 +43,23 @@ services:
   #   networks:
   #     - dou
   
-  urlscraper:
+  # urlscraper:
+  #   build:
+  #     context: urlscraper
+  #   depends_on:
+  #     - rabbitmq
+  #   restart: on-failure
+  #   links: 
+  #     - rabbitmq
+  #   networks:
+  #     - dou
+  
+  texttransformer:
     build:
-      context: urlscraper
-    depends_on:
-      - rabbitmq
+      context: texttransformer
     restart: on-failure
-    links: 
-      - rabbitmq
+    # links:
+    #   - rabbitmq
     networks:
       - dou
 

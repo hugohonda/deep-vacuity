@@ -2,7 +2,6 @@
 
 import re
 import os
-import time
 import pika
 import json
 from datetime import datetime
@@ -81,15 +80,3 @@ def emit_urls(urls):
 
     print(f' [x] Emitted {len(urls)} urls to queue')
     connection.close()
-
-def main():
-    urls = get_document_urls(begin_month=12, year=2014)
-    emit_urls(urls)
-
-if __name__ == '__main__':
-    main()
-    try:
-        while True:
-            time.sleep(1)
-    except Exception as e:
-        print('Error:', str(e))
