@@ -15,7 +15,7 @@ def match_unique(regex, input_text, flags=re.MULTILINE+re.IGNORECASE):
 def is_dict_empty(dictionary):
     return all(value == [] for value in dictionary.values())
 
-
+    
 def extract_basics(text):
     parsed = {}
     
@@ -49,15 +49,21 @@ def extract_basics(text):
     monetary_regex = r'(?:(?:(?<!c)r\$\s*)(?:\d+)(?:[\. ]\d+)*(?:,\d+)?)(?:(?:\s+de)?\s+(?:rea(?:l|is)|centavos?))?|(?:(?:(?<!c)r\$\s*)?(?:\d+)(?:[\. ]\d+)*(?:,\d+)?)(?:(?:\s+de)?\s+(?:rea(?:l|is)|centavos?))'
     parsed['monetary'] = match_unique(monetary_regex, text)
     
-    contracted_regex = r'(?:[Cc]ontratad[ao](?:\([ao]\))?|CONTRATAD[AO](?:\([AO]\))?)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&]+[\wÀ-ÿ]+)*)\W'
+    contracted_regex = r'(?:[Cc]ontratad[ao](?:\([ao]\))?|CONTRATAD[AO](?:\([AO]\))?)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\']+[\wÀ-ÿ]+)*)\W'
     parsed['contracted_party'] = match_unique(contracted_regex, text, flags=re.MULTILINE)
     
-    contracting_regex = r'(?:[Cc]ontratante|CONTRATANTE)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&]+[\wÀ-ÿ]+)*)\W'
+    contracting_regex = r'(?:[Cc]ontratante|CONTRATANTE)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\']+[\wÀ-ÿ]+)*)\W'
     parsed['contracting_party'] = match_unique(contracting_regex, text, flags=re.MULTILINE)
     
-    object_regex = r'(?:[Oo]bjeto|OBJETO|[Ff]inalidade|FINALIDADE|[Ll]icitado|LICITADO|[Oo]bjetivo|OBJETIVO|[Ee]sp.cie|ESP.CIE)[sS]?(?:\s+[Rr]esumid[ao])?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\,]+[\wÀ-ÿ]+)*)\W'
+    object_regex = r'(?:[Oo]bjeto|OBJETO|[Ff]inalidade|FINALIDADE|[Oo]bjetivo|OBJETIVO|[Ee]sp.cie|ESP.CIE)[sS]?(?:\s+[Rr]esumid[ao])?\s*:?\s*"?([a-zA-Z][\wÀ-ÿ]*(?:[\s\-&]+[\wÀ-ÿ]+)*)"?\W'
     parsed['object'] = match_unique(object_regex, text, flags=re.MULTILINE)
     
     if is_dict_empty(parsed):
         return None
     return parsed
+
+def is_bidding(text):
+    bidding_notice_regex = re.compile(r'(?!(?:extrato|aviso|processo)[\s\S]*?(?:dispen|inex)[\s\S]*?licita)^(?:extrato|aviso|processo)[\s\S]*?licita', re.IGNORECASE)
+    if bidding_notice_regex.search(text):
+        return True
+    return False
