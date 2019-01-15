@@ -15,7 +15,7 @@ def match_unique(regex, input_text, flags=re.MULTILINE+re.IGNORECASE):
 def is_dict_empty(dictionary):
     return all(value == [] for value in dictionary.values())
 
-    
+   
 def extract_basics(text):
     parsed = {}
     
@@ -31,10 +31,10 @@ def extract_basics(text):
     phone_company_regex = r'\D(0800[\-\s]?\d{4,}?)\D'
     parsed['phone'].extend(match_unique(phone_company_regex, text))
 
-    email_regex = r'([\w\d_\-\.]+@[\w\d_\-\.]+\.\w{2,5})\W'
+    email_regex = r'([\w\d_\-\.]+@(?:(?:[a-z_\-]+\.)+br|(?:[a-z_\-]+\.)+com|(?:[a-z_\-]+\.)+[a-z]{2,5}))\W'
     parsed['email'] = match_unique(email_regex, text)
 
-    website_regex = r'(?<![@\.\w\d])((?:http\:\/\/|https\:\/\/)?(?:[a-z][\w\d\-]{2,}\.)+[a-z][\w\d\-\/]*)(?![@\w])'
+    website_regex = r'(?<![@\.\w@])((?:https?\:\/{2})?(?:(?:[a-z_\-\d]+\.)+br|(?:[a-z_\-\d]+\.)+com|(?:[a-z_\-\d]+\.){2,}[a-z]{2,5}))(?![@\w])'
     parsed['website'] = match_unique(website_regex, text)
 
     cnpj_regex = r'\D(\d{2}\.?\d{3}\.?\d{3}[\/\-\.]?\d{4}[\/\-\.]?\d{2})\D'
@@ -49,13 +49,13 @@ def extract_basics(text):
     monetary_regex = r'(?:(?:(?<!c)r\$\s*)(?:\d+)(?:[\. ]\d+)*(?:,\d+)?)(?:(?:\s+de)?\s+(?:rea(?:l|is)|centavos?))?|(?:(?:(?<!c)r\$\s*)?(?:\d+)(?:[\. ]\d+)*(?:,\d+)?)(?:(?:\s+de)?\s+(?:rea(?:l|is)|centavos?))'
     parsed['monetary'] = match_unique(monetary_regex, text)
     
-    contracted_regex = r'(?:[Cc]ontratad[ao](?:\([ao]\))?|CONTRATAD[AO](?:\([AO]\))?)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\']+[\wÀ-ÿ]+)*)\W'
+    contracted_regex = r'(?:[Cc]ontratad[ao](?:\([ao]\))?|CONTRATAD[AO|[Cc]oncedente|CONCEDENTE|[Oo]utorgante|OUTORGANTE]](?:\([AO]\))?)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\']+[\wÀ-ÿ]+)*)\W'
     parsed['contracted_party'] = match_unique(contracted_regex, text, flags=re.MULTILINE)
     
-    contracting_regex = r'(?:[Cc]ontratante|CONTRATANTE)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\']+[\wÀ-ÿ]+)*)\W'
+    contracting_regex = r'(?:[Cc]ontratante|CONTRATANTE|[Cc]onvenente|CONVENENTE|[Oo]utorgado|OUTORGADO)[sS]?\s*:?\s*([A-Z][\wÀ-ÿ]*(?:[\s\-&\']+[\wÀ-ÿ]+)*)\W'
     parsed['contracting_party'] = match_unique(contracting_regex, text, flags=re.MULTILINE)
     
-    object_regex = r'(?:[Oo]bjeto|OBJETO|[Ff]inalidade|FINALIDADE|[Oo]bjetivo|OBJETIVO|[Ee]sp.cie|ESP.CIE)[sS]?(?:\s+[Rr]esumid[ao])?\s*:?\s*"?([a-zA-Z][\wÀ-ÿ]*(?:[\s\-&]+[\wÀ-ÿ]+)*)"?\W'
+    object_regex = r'(?:[Oo]bjeto|OBJETO|[Ff]inalidade|FINALIDADE|[Oo]bjetivo|OBJETIVO|[Ee]sp.cie|ESP.CIE)[sS]?(?:\s+[Rr]esumid[ao])?\s*:?\s*"?([a-zA-Z][\wÀ-ÿ]*(?:[\s\-&]+[\(\)\wÀ-ÿ]+)*)"?\W'
     parsed['object'] = match_unique(object_regex, text, flags=re.MULTILINE)
     
     if is_dict_empty(parsed):

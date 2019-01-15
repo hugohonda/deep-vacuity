@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from entityextractor import extract_basics, is_bidding
 from preprocessor import preprocess
 from pprint import pprint
