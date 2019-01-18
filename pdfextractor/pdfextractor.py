@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import re
 import pika
 import json
 import time
-import re
+import pathlib
 import subprocess
 import requests
 import tempfile
@@ -61,13 +62,13 @@ def get_pdf_online_content (url):
 
 def get_pages_content (url):
     '''
-    Get bulk of pages content from a document.
+    Get data from pages content from a document.
     Args:
         param1 (dict): The document dict.
     Returns:
         list: returns a list from pages content from the reference document.
     '''
-    bulk = []
+    data = []
     parsed = parse_doc_url(url)
     for page_number in range(parsed['first_page'], parsed['last_page']):
         body = ''
@@ -82,20 +83,41 @@ def get_pages_content (url):
                 'url': page_url,
                 'status': True
             }
-            bulk.append(page)
+            data.append(page)
         except Exception as error:
             raise error
-    return bulk
+    return data
 
 def generate_json_file (urls):
+    '''
+    Generates JSON file from extracted URLs.
+    '''
+    dirpath = pathlib.Path('./data/documents/')
+    dirpath.mkdir(parents=True, exist_ok=True)
     data = []
     for url in urls:
-        print(url)
         parsed = parse_doc_url(url)
-        content = get_pages_content(url)
-        data.extend(content)
-        with open(f"../data/{parsed['filename']}.json", mode='w', encoding='utf-8') as outfile:
-            json.dump(data, outfile)
+        filename = f"{parsed['filename']}.json"
+        filepath = dirpath / filename
+        if not filepath.exists():
+            print(url)
+            content = get_pages_content(url)
+            data.extend(content)
+            with filepath.open(mode='w', encoding='utf-8') as outfile:
+                json.dump(data, outfile)
+        else:
+            print(f'{str(filepath)} already exists')
+
+def load_urls():
+    '''
+    Load URLs from JSON file array.
+    '''
+    dirpath = pathlib.Path('./data/')
+    dirpath.mkdir(parents=True, exist_ok=True)
+    filename = 'urls.json'
+    filepath = dirpath / filename
+    with filepath.open('r', encoding ='utf-8') as outfile:
+        return json.load(outfile)
 
 def receive_urls():
     credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_pass)

@@ -4,6 +4,7 @@ import re
 import os
 import pika
 import json
+import pathlib
 from datetime import datetime
 from bs4 import BeautifulSoup
 from helpers.helpers import rabbitmq_info, headers, get_response
@@ -65,6 +66,14 @@ def get_document_urls(year=datetime.now().year-1, begin_day=1, begin_month=1, en
                 urls.append(parsed)
     urls.sort(key=lambda x: datetime.strptime(re.search(r'(?<=data=)\d{2}\/\d{2}\/\d{4}', x).group(0), '%d/%m/%Y'))
     return urls
+
+def dump_urls(urls):
+    dirpath = pathlib.Path('./data/')
+    dirpath.mkdir(parents=True, exist_ok=True)
+    filename = 'urls.json'
+    filepath = dirpath / filename
+    with filepath.open('w', encoding ='utf-8') as outfile:
+        json.dump(urls, outfile)
 
 def emit_urls(urls):
     credentials = pika.PlainCredentials(rabbitmq_info['rabbitmq_user'], rabbitmq_info['rabbitmq_pass'])
