@@ -1,0 +1,4 @@
+pika
+requests
+nltk
+bs4

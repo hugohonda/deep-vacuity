@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import re
-import pika
 import json
 import time
 import pathlib
@@ -10,6 +9,7 @@ import requests
 import tempfile
 from datetime import datetime
 from helpers.helpers import headers, get_response
+# import pika
 
 exchange_name = 'urls_exchange'
 queue_name = 'urls_queue'
@@ -44,13 +44,11 @@ def get_pdf_online_content (url):
         str: returns text converted from the pdf in the URL.
     '''
     try:
-        result = get_response(url, stream=True)
-        pdf_content = result.content
+        result = get_response(url)
         temp_file = tempfile.TemporaryFile()
-        temp_file.write(pdf_content)
+        temp_file.write(result.content)
         temp_file.seek(0)
-        process = subprocess.Popen(['pdftotext', '-raw', '-enc', 'UTF-8', '-', '-'], stdin=temp_file, stdout=subprocess.PIPE)
-        output, error = process.communicate()
+        output, error  = subprocess.Popen(['pdftotext', '-raw', '-enc', 'UTF-8', '-', '-'], stdin=temp_file, stdout=subprocess.PIPE).communicate()
         pdf_text = str(output, 'utf-8')
         temp_file.close()
         if error:
@@ -119,26 +117,26 @@ def load_urls():
     with filepath.open('r', encoding ='utf-8') as outfile:
         return json.load(outfile)
 
-def receive_urls():
-    credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_pass)
-    connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq', '5672', '/', credentials))
-    channel = connection.channel()
+# def receive_urls():
+#     credentials = pika.PlainCredentials(rabbitmq_user, rabbitmq_pass)
+#     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq', '5672', '/', credentials))
+#     channel = connection.channel()
 
-    channel.exchange_declare(exchange=exchange_name,
-                            exchange_type='fanout')
+#     channel.exchange_declare(exchange=exchange_name,
+#                             exchange_type='fanout')
 
-    result = channel.queue_declare(exclusive=True)
-    queue_name = result.method.queue
+#     result = channel.queue_declare(exclusive=True)
+#     queue_name = result.method.queue
 
-    channel.queue_bind(exchange=exchange_name,
-                        queue=queue_name)
+#     channel.queue_bind(exchange=exchange_name,
+#                         queue=queue_name)
 
-    def callback(ch, method, properties, body):
-        urls = json.loads(body)
-        generate_json_file(urls)
+#     def callback(ch, method, properties, body):
+#         urls = json.loads(body)
+#         generate_json_file(urls)
 
-    channel.basic_consume(callback,
-                            queue=queue_name,
-                            no_ack=True)
+#     channel.basic_consume(callback,
+#                             queue=queue_name,
+#                             no_ack=True)
 
-    channel.start_consuming()
+#     channel.start_consuming()

@@ -51,7 +51,7 @@ def get_document_urls(year=datetime.now().year-1, begin_day=1, begin_month=1, en
     max_pages = 1
     if begin_day != end_day:
         last_page = soup.find('a', text=re.compile('.ltimo'))['href']
-        max_pages = int(re.search(r'-p=(\d+)&', last_page)[1])
+        max_pages = int(re.search(r'-p=(\d+)', last_page)[1])
     for page in range(1, max_pages+1):
         page_url = f'{base_url}&d-7825134-p={page}'
         response = get_response(page_url, stream=True)
