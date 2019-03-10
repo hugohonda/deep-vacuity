@@ -7,55 +7,15 @@ import requests
 from bs4 import BeautifulSoup
 from multiprocessing import Pool
 from datetime import date, timedelta
+from helpers.helpers import get_response
 import json
 
-from urllib3.util import Retry
-from requests.adapters import HTTPAdapter
-from requests import Session, ConnectionError, Timeout
-
-base_path = pathlib.Path('./data')
+output_path = pathlib.Path('./data/html_publications')
+output_path.mkdir(parents=True, exist_ok=True)
 base_url =' http://www.imprensanacional.gov.br/'
-base_section = '3'
-base_year = '2018'
-(base_path / base_year).mkdir(parents=True, exist_ok=True)
 
-headers = {
-    'user-agent': 'Mozilla/5.0 (X11; Debian; Linux x86_64; rv:63.0) Gecko/20100101 Firefox/63.0',
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'accept-Language': 'pt-BR,pt;q=0.5',
-    'accept-Encoding': 'gzip, deflate',
-    'connection': 'keep-alive',
-    'upgrade-insecure-requests': '1',
-    'referrer': 'https://google.com.br',
-}
-
-def requests_retry_session(retries=10, backoff_factor=0.3, status_forcelist=(500, 502, 504), session=None):
-    session = session or Session()
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=status_forcelist,
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
-
-def get_response (url, stream=False):
-    try:
-        response = requests_retry_session().get(url, headers=headers, stream=stream)
-    except ConnectionError as e:
-        print(f'Connection Error. Technical details:\n{str(e)}')
-    except Timeout as e:
-        print(f'Timeout Error:\n{str(e)}')
-    except Exception as e:
-        print(f'General Error :\n{e.__class__.__name__}')
-    finally:
-        return response
-def extract_html_publications(date):
-    url = f'{base_url}leiturajornal?data={date}&secao=dou{base_section}'
+def extract_html_publications(date, base_section=3):
+    url = f'{base_url}leiturajornal?data={date}&secao=dou{str(base_section)}'
     print(url)
     content = get_response(url, stream=True).content
     soup =  BeautifulSoup(content, 'html.parser', from_encoding='utf8')
@@ -114,8 +74,6 @@ def get_publication(url):
     return obj
 
 def generate_html_publications(date):
-    output_path = pathlib.Path('./data/html_publications')
-    output_path.mkdir(parents=True, exist_ok=True)
     output_filename = ''.join(date.split('-')[::-1]) + '.json'
     output_filepath = output_path / output_filename
     if output_filepath.exists():
