@@ -8,7 +8,7 @@ import subprocess
 import requests
 import tempfile
 from datetime import datetime
-from helpers.helpers import headers, get_response
+from helpers.helpers import get_response
 # import pika
 
 exchange_name = 'urls_exchange'
